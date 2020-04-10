@@ -2,3 +2,6 @@ bot.log
 test.py
 venv/
 .idea/
+.DS_Store
+__pycache__/settings.cpython-38.pyc
+__pycache__/test.cpython-38.pyc

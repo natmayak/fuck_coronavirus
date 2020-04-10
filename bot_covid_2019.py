@@ -53,11 +53,6 @@ def bust_covid(update, context):
     busted_covid = choice(covid_gifs) # choice выбирает файл из списка
     context.bot.send_video(chat_id=update.message.chat.id, video=open(busted_covid, 'rb'))
 
-# def stay_home(update, context):
-#     voice = glob('media/*.mp3')
-#     brodsky = choice(voice)
-#     context.bot.send_voice(chat_id=update.message.chat.id, voice=open(brodsky, 'rb'))
-
 
 def brodsky(update, context):
     context.bot.send_voice(chat_id=update.message.chat.id, voice=open(choice(glob('media/*.mp3')), 'rb'))
