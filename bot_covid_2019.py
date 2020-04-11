@@ -2,7 +2,7 @@ from emoji import emojize
 from glob import glob
 from random import choice
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
 import settings
 import logging
@@ -18,6 +18,12 @@ def greeting(update, context):
     # todo Добавить инструкцию и описание бота типа что бот делает, как и что делать пользователю
     greeting_text = f'Hello {first_name}{emo}. Best of luck with the corona crisis. I am going to help you stay alive. Try to keep your hands off anyway'
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting_text, reply_markup=get_keyboard())
+    print(update.effective_chat.id)
+
+
+def get_chat_id(update):
+    chat_id = update.effective_chat.id
+    return chat_id
 
 
 def talk_to_me(update, context):
@@ -64,35 +70,43 @@ def brodsky(update, context):
     # на войс не писала отдельную функцию, работает по принципу стикера: в папке ищем файл, отбираем 1
 
 
-def regular_messages(update, context, sticker, reply_button):
-    face = "Don't touch your face!"
+def regular_messages(context):
+    face = "Do not touch your face!"
     hands = "Wash your hands!"
     windows = "Open your windows and go out of your room for 10-15 minutes"
     fuck = "Fuck coronavirus!"
     messages = [face, hands, windows, fuck]
     revealed_message = choice(messages)
     if revealed_message == face:
-        keyboard = InlineKeyboardButton('Well I do not touch it!')
+        keyboard = [[InlineKeyboardButton('Well I do not touch it!', callback_data='1')]]
         reply_button = InlineKeyboardMarkup(keyboard)
-        sticker = glob('face.tgs')
+        stickers = glob('media/face.tgs')
+        sticker = choice(stickers)
     elif revealed_message == hands:
-        keyboard = InlineKeyboardButton('Alright, alright. I have washed my hands!')
-        reply_button = InlineKeyboardMarkup(keyboard)
-        sticker = glob('hands.tgs')
+         keyboard = [[InlineKeyboardButton('Alright, alright. I have washed my hands!', callback_data='2')]]
+         reply_button = InlineKeyboardMarkup(keyboard)
+         stickers = glob('media/hands.tgs')
+         sticker = choice(stickers)
     elif revealed_message == windows:
-        keyboard = InlineKeyboardButton('Hm ok, I will do that.')
+         keyboard = [[InlineKeyboardButton('Hm ok, I will do that.', callback_data='3')]]
+         reply_button = InlineKeyboardMarkup(keyboard)
+         stickers = glob('media/fine.tgs')
+         sticker = choice(stickers)
+    else:
+        keyboard = [[InlineKeyboardButton('Hell yeah! Fuck it!!!', callback_data='4')]]
         reply_button = InlineKeyboardMarkup(keyboard)
-        sticker = glob('fine.tgs')
-    elif revealed_message == fuck:
-        keyboard = InlineKeyboardButton('Hell yeah! Fuck it!!!')
-        reply_button = InlineKeyboardMarkup(keyboard)
-        sticker = glob('fuck.tgs')
-    context.bot.send_sticker(chat_id=update.message.chat.id, sticker=open(sticker, 'rb'))
-    context.bot.send_message(chat_id=update.message.chat_id, text=revealed_message, reply_markup=reply_button)
+        stickers = glob('media/fuck.tgs')
+        sticker = choice(stickers)
+    #todo разобраться с chat id
+    context.bot.send_sticker(chat_id=250851846, sticker=open(sticker, 'rb'))
+    context.bot.send_message(chat_id=250851846, text=revealed_message, reply_markup=reply_button)
 
-#todo для теста, удалить, когда заработает обычная функция
-def bla(update, context):
-    context.bot.send_message(chat_id=update.message.chat_id, text='bla')
+
+def button(update, context):
+    query = update.callback_query
+    query.answer()
+    #todo нужно еще удалять стикеры.
+    query.edit_message_text(text='Well, it is not going to save you anyway. Better prepare to die')
 
 
 def main():
@@ -106,9 +120,9 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(sticker)$'), send_covid))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(MessageHandler(Filters.location, get_location))
-    dp.job_queue.run_repeating(regular_messages, interval=60, first=0)
-    # todo для теста, удалить, когда заработает обычная функция
-    dp.job_queue.run_once(bla, 1)
+    updater.job_queue.run_repeating(regular_messages, interval=10, first=0)
+    dp.add_handler(CallbackQueryHandler(button))
+
     updater.start_polling()
     updater.idle()
 
