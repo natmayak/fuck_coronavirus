@@ -76,7 +76,6 @@ def regular_messages(context):
         context.bot.send_sticker(chat_id=165436471, sticker=open(sticker, 'rb'))
 
 
-
 def button(update, context):
     query = update.callback_query
     query.answer()
