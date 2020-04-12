@@ -21,11 +21,6 @@ def greeting(update, context):
     print(update.effective_chat.id)
 
 
-def get_chat_id(update):
-    chat_id = update.effective_chat.id
-    return chat_id
-
-
 def talk_to_me(update, context):
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     user_text = "Hi {} {}, you just caught some germs and said {}".format(update.message.chat.first_name, emo,
@@ -64,16 +59,22 @@ def brodsky(update, context):
 
 def regular_messages(context):
     action_set = [["Do not touch your face!", 'Well I do not touch it!', 'media/face.tgs', "But it's okay to touch yourself:)"],
-                ["Wash your hands!", 'Alright, alright. I have washed my hands!', 'media/hands.tgs', 'Enjoy your sparkling fingers then'],
-                ["Open your windows and go out of your room for 10-15 minutes", 'Hm ok, I will do that.', 'media/fine.tgs', 'Now breathe in deeply through the nose'],
-                ["Fuck coronavirus!", 'Hell yeah! Fuck it!!!', 'media/fuck.tgs', 'You are supposed to get a busted picture of covid that I do not have so far']]
+                ["Wash your hands!", 'Alright, alright. I have washed my hands!', 'media/hands.tgs', "Enjoy your sparkling fingers then"],
+                ["Open your windows and go out of your room for 10-15 minutes", "I'm ok, I will do that.", 'media/fine.tgs', "Now breathe in deeply through the nose"],
+                ["Fuck coronavirus!", "Hell yeah! Fuck it!", "media/fuck.tgs", "Busted picture of covid that I do not have so far"]]
     action = choice(action_set)
     keyboard = [[InlineKeyboardButton(action[1], callback_data=action[3])]]
     reply_button = InlineKeyboardMarkup(keyboard)
-    #sticker = choice(glob(str(action[2])))
     #todo разобраться с chat id
-    #context.bot.send_sticker(chat_id=165436471, sticker=open(sticker, 'rb'))
     context.bot.send_message(chat_id=165436471, text=action[0], reply_markup=reply_button)
+    #context.bot.send_message(chat_id=250851846, text=action[0], reply_markup=reply_button)
+    if action[0] == 'Fuck coronavirus!':
+        busted_covid = choice(glob('media/*.mp4'))
+        context.bot.send_video(chat_id=165436471, video=open(busted_covid, 'rb'))
+    else:
+        sticker = choice(glob(str(action[2])))
+        context.bot.send_sticker(chat_id=165436471, sticker=open(sticker, 'rb'))
+
 
 
 def button(update, context):
