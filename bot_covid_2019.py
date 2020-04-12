@@ -61,23 +61,20 @@ def brodsky(update, context):
 
 def regular_messages(context):
     action_set = [["Do not touch your face!", 'Well I do not touch it!', 'media/face.tgs', "But it's okay to touch yourself:)"],
-
-                ["Wash your hands!", 'Alright, alright. I have washed my hands!', 'media/hands.tgs', 'Enjoy your sparkling fingers then'],
-                ["Open your windows and go out of your room for 10-15 minutes", 'Well ok, I will do that.', 'media/fine.tgs', 'Now breathe in deeply through the nose'],
-                ["Fuck coronavirus!", 'Hell yeah! Fuck it!!!', 'media/fuck.tgs', 'Busted picture of covid that I do not have so far']]
+                  ["Wash your hands!", 'Alright, alright. I have washed my hands!', 'media/hands.tgs', 'Enjoy your sparkling fingers then'],
+                  ["Open your windows and go out of your room for 10-15 minutes", 'Well ok, I will do that.', 'media/fine.tgs', 'Now breathe in deeply through the nose'],
+                  ["Fuck coronavirus!", 'Hell yeah! Fuck it!!!', 'media/fuck.tgs', 'Busted picture of covid that I do not have so far']]
     action = choice(action_set)
     keyboard = [[InlineKeyboardButton(action[1], callback_data=action[3])]]
     reply_button = InlineKeyboardMarkup(keyboard)
-    #sticker = choice(glob(str(action[2])))
     for chat_id in subscribers:
-        #context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
-        context.bot.send_message(chat_id=chat_id, text=action[0], reply_markup=reply_button
+        context.bot.send_message(chat_id=chat_id, text=action[0], reply_markup=reply_button)
         if action[0] == 'Fuck coronavirus!':
             busted_covid = choice(glob('media/*.mp4'))
             context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
         else:
             sticker = choice(glob(str(action[2])))
-            context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb')))
+            context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
 
 
 def button(update, context):
