@@ -1,5 +1,7 @@
 bot.log
 test.py
+gps_test.py
+gpsData.py
 venv/
 .idea/
 .DS_Store

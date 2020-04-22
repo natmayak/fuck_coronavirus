@@ -78,12 +78,12 @@ def regular_messages(context):
     reply_button = InlineKeyboardMarkup(keyboard)
     for chat_id in subscribers:
         context.bot.send_message(chat_id=chat_id, text=action[0], reply_markup=reply_button)
-        if action[0] == 'Fuck coronavirus!':
-            busted_covid = choice(glob('media/*.mp4'))
-            context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
-        else:
-            sticker = choice(glob(str(action[2])))
-            context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
+        # if action[0] == 'Fuck coronavirus!':
+        #     busted_covid = choice(glob('media/*.mp4'))
+        #     context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
+        # else:
+        #     sticker = choice(glob(str(action[2])))
+        #     context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
 
 
 def button(update, context):
@@ -94,23 +94,23 @@ def button(update, context):
 
 
 def subscribe(update, context):
-    subscribe_text = "Hey thanks for your subscribing! If you are not good enought for us you can always use /unsubscribe. But better do not. Please?"
+    subscribe_text = "Hey thanks for your subscribing! If you are not good enough for us you can always use /unsubscribe. But you'd rather not. Please"
     already_subscribe_text = "Oh please stop it! You are already such a good boy/girl."
     if update.message.chat_id in subscribers:
         context.bot.send_message(chat_id=update.message.chat_id, text=already_subscribe_text,
                                  reply_markup=get_keyboard(update))
     else:
-        context.bot.send_message(chat_id=update.message.chat_id, text=subscribe_text, reply_markup=get_keyboard(update))
         subscribers.add(update.message.chat_id)
+        context.bot.send_message(chat_id=update.message.chat_id, text=subscribe_text, reply_markup=get_keyboard(update))
 
 
 def unsubscribe(update, context):
     unsubscribe_text = "Well you are gonna die anyway. Little pussy! See you..."
-    nonsubscribe_text = "And how you can unsubscribe if you are not subscribed yet? Use your brain and press /subscribe"
+    nonsubscribe_text = "How can you unsubscribe if you haven't subscribed yet? Use your brain and press /subscribe"
     if update.message.chat_id in subscribers:
+        subscribers.remove(update.message.chat_id)
         context.bot.send_message(chat_id=update.message.chat_id, text=unsubscribe_text,
                                  reply_markup=get_keyboard(update))
-        subscribers.remove(update.message.chat_id)
     else:
         context.bot.send_message(chat_id=update.message.chat_id, text=nonsubscribe_text,
                                  reply_markup=get_keyboard(update))
@@ -126,7 +126,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(unsubscribe)$'), unsubscribe))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(MessageHandler(Filters.location, get_location))
-    updater.job_queue.run_repeating(regular_messages, interval=20, first=10)
+    updater.job_queue.run_repeating(regular_messages, interval=1020, first=10)
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
