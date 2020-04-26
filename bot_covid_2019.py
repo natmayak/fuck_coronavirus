@@ -13,6 +13,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 # Создаем сет с подписчиками. Отсюда будем забирать чат айди
 subscribers = set()
 
+#Создаем переменную, обозначающую, находится ли юзер дома или нет. По-умолчанию - да
+inhouse = True
+
 
 def greeting(update, context):
     user = update.effective_user
@@ -30,7 +33,11 @@ def get_keyboard(update):
         sub_button = 'unsubscribe'
     else:
         sub_button = 'subscribe'
-    buttons = ReplyKeyboardMarkup([['I want to go out', sub_button], [location_button]], resize_keyboard=True)
+    if inhouse == True:
+        leave_button = 'I am leaving my place'
+    else:
+        leave_button = 'I am back'
+    buttons = ReplyKeyboardMarkup([['I want to go out', leave_button, sub_button], [location_button]], resize_keyboard=True)
     return buttons
 
 
@@ -76,8 +83,11 @@ def regular_messages(context):
     action = choice(action_set)
     keyboard = [[InlineKeyboardButton(action[1], callback_data=action[3])]]
     reply_button = InlineKeyboardMarkup(keyboard)
-    for chat_id in subscribers:
-        context.bot.send_message(chat_id=chat_id, text=action[0], reply_markup=reply_button)
+    if inhouse == True:
+        for chat_id in subscribers:
+            context.bot.send_message(chat_id=chat_id, text=action[0], reply_markup=reply_button)
+    else:
+        pass
         # if action[0] == 'Fuck coronavirus!':
         #     busted_covid = choice(glob('media/*.mp4'))
         #     context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
@@ -116,6 +126,19 @@ def unsubscribe(update, context):
                                  reply_markup=get_keyboard(update))
 
 
+def leave_home(update, context):
+    leave_home_text = "Well it is your own risk. Do not whine afterwards. However dead people can't whine..."
+    global inhouse
+    inhouse = False
+    context.bot.send_message(chat_id = update.message.chat_id, text=leave_home_text, reply_markup=get_keyboard(update))
+
+
+def back_home(update, context):
+    back_home_text = 'Thanks god, you are still alive. But probably it will not last longer.'
+    global inhouse
+    inhouse = True
+    context.bot.send_message(chat_id=update.message.chat_id, text=back_home_text, reply_markup=get_keyboard(update))
+
 def main():
     updater = Updater(settings.API_KEY, request_kwargs=settings.PROXY, use_context=True)
 
@@ -124,9 +147,11 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(I want to go out)$'), brodsky))
     dp.add_handler(MessageHandler(Filters.regex('^(subscribe)$'), subscribe))
     dp.add_handler(MessageHandler(Filters.regex('^(unsubscribe)$'), unsubscribe))
+    dp.add_handler(MessageHandler(Filters.regex('^(I am leaving my place)$'), leave_home))
+    dp.add_handler(MessageHandler(Filters.regex('^(I am back)$'), back_home))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(MessageHandler(Filters.location, get_location))
-    updater.job_queue.run_repeating(regular_messages, interval=1020, first=10)
+    updater.job_queue.run_repeating(regular_messages, interval=10, first=10)
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
