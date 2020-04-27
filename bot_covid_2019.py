@@ -21,8 +21,11 @@ def greeting(update, context):
     user = update.effective_user
     first_name = user.first_name
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
-    # todo Добавить инструкцию и описание бота типа что бот делает, как и что делать пользователю
-    greeting_text = f'Hello {first_name}{emo}. Best of luck with the corona crisis. I am going to help you to stay alive. Try to keep your hands off anyway. Now try /subscribe and see what happens!'
+    greeting_text = f'Hello {first_name}{emo}. Best of luck with the corona crisis. I am going to help you to stay alive. \n ' \
+                    f'\n' \
+                    f'Try to keep your hands off anyway. Now try /subscribe and see what happens! \n' \
+                    f'\n' \
+                    f'Also we can show you the closest pharmacy if something goes wrong with you. Try /location'
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting_text, reply_markup=get_keyboard(update))
     print(update.effective_chat.id)
 
@@ -155,6 +158,7 @@ def main():
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
+    dp.add_handler(CommandHandler('location', get_location))
 
     updater.start_polling()
     updater.idle()
