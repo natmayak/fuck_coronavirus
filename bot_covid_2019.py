@@ -203,8 +203,8 @@ def main():
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', greeting))
     dp.add_handler(MessageHandler(Filters.regex('^(I want to go out)$'), brodsky))
-    dp.add_handler(MessageHandler(Filters.regex('^(subscribe)$'), subscribe))
-    dp.add_handler(MessageHandler(Filters.regex('^(unsubscribe)$'), unsubscribe))
+    dp.add_handler(MessageHandler(Filters.regex('^(Subscribe)$'), subscribe))
+    dp.add_handler(MessageHandler(Filters.regex('^(Unsubscribe)$'), unsubscribe))
     dp.add_handler(MessageHandler(Filters.regex('^(I am leaving my place)$'), leave_home))
     dp.add_handler(MessageHandler(Filters.regex('^(I am back)$'), back_home))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
