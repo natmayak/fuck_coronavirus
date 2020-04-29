@@ -52,7 +52,8 @@ def talk_to_me(update, context):
 
 
 def get_location(update, context):
-    print(update.message.location)
+    location = update.message.location
+    print(location)
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     location_text = f'Big brother is watching you (for your own safety) {emo}'
     context.bot.send_message(chat_id=update.effective_chat.id, text=location_text, reply_markup=get_keyboard(update))
@@ -133,7 +134,7 @@ def leave_home(update, context):
     leave_home_text = "Well it is your own risk. Do not whine afterwards. However dead people can't whine..."
     global inhouse
     inhouse = False
-    context.bot.send_message(chat_id = update.message.chat_id, text=leave_home_text, reply_markup=get_keyboard(update))
+    context.bot.send_message(chat_id=update.message.chat_id, text=leave_home_text, reply_markup=get_keyboard(update))
 
 
 def back_home(update, context):
