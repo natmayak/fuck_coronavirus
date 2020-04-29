@@ -32,7 +32,7 @@ def greeting(update, context):
                     f'\n' \
                     f'Try to keep your hands off anyway. Now try /subscribe and see what happens! \n' \
                     f'\n' \
-                    f'Also we can show you the closest pharmacy if something goes wrong with you. Try /location'
+                    f'Also we can show you the closest pharmacy if something goes wrong with you. Try Pharmacies button and we will show you where you should go'
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting_text, reply_markup=get_keyboard(update))
     print(update.effective_chat.id)
 
