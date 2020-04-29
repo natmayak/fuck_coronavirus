@@ -6,15 +6,22 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 
 import settings
 import logging
+import requests
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO, filename='bot.log')
 
 # Создаем сет с подписчиками. Отсюда будем забирать чат айди
+#todo Сделать базу данных для сабов
 subscribers = set()
 
-#Создаем переменную, обозначающую, находится ли юзер дома или нет. По-умолчанию - да
+# Создаем переменную, обозначающую, находится ли юзер дома или нет. По-умолчанию - да
 inhouse = True
+
+# Создаем перменные с локацией пользователя
+longitude = float
+latitude = float
 
 
 def greeting(update, context):
@@ -31,16 +38,16 @@ def greeting(update, context):
 
 
 def get_keyboard(update):
-    location_button = KeyboardButton('location', request_location=True)
+    location_button = KeyboardButton('Pharmacies', request_location=True)
     if update.message.chat_id in subscribers:
-        sub_button = 'unsubscribe'
+        sub_button = 'Unsubscribe'
     else:
-        sub_button = 'subscribe'
+        sub_button = 'Subscribe'
     if inhouse == True:
         leave_button = 'I am leaving my place'
     else:
         leave_button = 'I am back'
-    buttons = ReplyKeyboardMarkup([['I want to go out', leave_button, sub_button], [location_button]], resize_keyboard=True)
+    buttons = ReplyKeyboardMarkup([['I want to go out', leave_button], [sub_button], [location_button]], resize_keyboard=True)
     return buttons
 
 
@@ -51,12 +58,58 @@ def talk_to_me(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=user_text, reply_markup=get_keyboard(update))
 
 
+def get_yandex():
+    #todo названия аптек
+    API_URL = 'https://search-maps.yandex.ru/v1/'
+
+    PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', lang='ru_RU', apikey=settings.API_KEY_YNDX)
+
+    response = requests.get(API_URL, params=PARAMS)
+
+    results = response.json()
+    pharmacies = results['features']
+    lst_of_pharmacies = list()
+    lst_of_pharmacies.append(pharmacies[0]['geometry']['coordinates'])
+    lst_of_pharmacies.append(pharmacies[1]['geometry']['coordinates'])
+    lst_of_pharmacies.append(pharmacies[2]['geometry']['coordinates'])
+
+    coordinates_1 = lst_of_pharmacies[0]
+    coordinates_2 = lst_of_pharmacies[1]
+    coordinates_3 = lst_of_pharmacies[2]
+    longitude_1 = coordinates_1[0]
+    latitude_1 = coordinates_1[1]
+    longitude_2 = coordinates_2[0]
+    latitude_2 = coordinates_2[1]
+    longitude_3 = coordinates_3[0]
+    latitude_3 = coordinates_3[1]
+
+    link_1 = f'https://yandex.ru/maps/?text={latitude_1}%2C{longitude_1}'
+    link_2 = f'https://yandex.ru/maps/?text={latitude_2}%2C{longitude_2}'
+    link_3 = f'https://yandex.ru/maps/?text={latitude_3}%2C{longitude_3}'
+
+    return link_1, link_2, link_3
+
+
 def get_location(update, context):
     location = update.message.location
+    global latitude
+    latitude = location['latitude']
+    global longitude
+    longitude = location['longitude']
     print(location)
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     location_text = f'Big brother is watching you (for your own safety) {emo}'
+    pharmacies_text = 'Here are the nearest pharmacies to you:'
+    links = get_yandex()
+    print(links)
+    link_1 = links[0]
+    link_2 = links[1]
+    link_3 = links[2]
     context.bot.send_message(chat_id=update.effective_chat.id, text=location_text, reply_markup=get_keyboard(update))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=pharmacies_text, reply_markup=get_keyboard(update))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=link_1, reply_markyp=get_keyboard(update))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=link_2, reply_markyp=get_keyboard(update))
+    context.bot.send_message(chat_id=update.effective_chat.id, text=link_3, reply_markyp=get_keyboard(update))
 
 
 def send_covid(update, context):
@@ -108,7 +161,8 @@ def button(update, context):
 
 
 def subscribe(update, context):
-    subscribe_text = "Hey thanks for your subscribing! If you are not good enough for us you can always use /unsubscribe. But you'd rather not. Please"
+    subscribe_text = "Hey thanks for your subscribing! If you are not good enough for us you can always use /unsubscribe. " \
+                     "But you'd rather not. Please"
     already_subscribe_text = "Oh please stop it! You are already such a good boy/girl."
     if update.message.chat_id in subscribers:
         context.bot.send_message(chat_id=update.message.chat_id, text=already_subscribe_text,
