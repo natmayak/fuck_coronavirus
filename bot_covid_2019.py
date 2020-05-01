@@ -155,7 +155,7 @@ def button(update, context):
 
 
 def subscribe(update, context):
-    subscribe_text = "Hey thanks for your subscribing! If you are not good enough for us you can always use /unsubscribe. " \
+    subscribe_text = "Thanks for subscribing! If you are not good enough for us you can always use /unsubscribe. " \
                      "But you'd rather not. Please"
     already_subscribe_text = "Oh please stop it! You are already such a good boy/girl."
     if update.message.chat_id in subscribers:
@@ -167,7 +167,7 @@ def subscribe(update, context):
 
 
 def unsubscribe(update, context):
-    unsubscribe_text = "Well you are gonna die anyway. Little pussy! See you..."
+    unsubscribe_text = "Well, you gonna die anyway. See you, little pussy..."
     nonsubscribe_text = "How can you unsubscribe if you haven't subscribed yet? Use your brain and press /subscribe"
     if update.message.chat_id in subscribers:
         subscribers.remove(update.message.chat_id)
