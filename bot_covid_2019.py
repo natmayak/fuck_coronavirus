@@ -140,7 +140,7 @@ def regular_messages(context):
     action = choice(action_set)
     keyboard = [[InlineKeyboardButton(action[1], callback_data=action[3])]]
     reply_button = InlineKeyboardMarkup(keyboard)
-    if inhouse == True:
+    if inhouse:
         for user in get_subscribers(db):
             context.bot.send_message(chat_id=user['chat_id'], text=action[0], reply_markup=reply_button)
     else:
@@ -214,7 +214,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(I am back)$'), back_home))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(MessageHandler(Filters.location, get_location))
-    updater.job_queue.run_repeating(regular_messages, interval=10, first=5)
+    updater.job_queue.run_repeating(regular_messages, interval=5, first=5)
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
