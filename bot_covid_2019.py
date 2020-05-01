@@ -4,6 +4,8 @@ from random import choice
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
+from db import db, get_or_create_user #toogle_subscription
+
 import settings
 import logging
 import requests
@@ -34,6 +36,7 @@ def greeting(update, context):
                     f'\n' \
                     f'Also we can show you the closest pharmacy if something goes wrong with you. Try Pharmacies button and we will show you where you should go'
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting_text, reply_markup=get_keyboard(update))
+    get_or_create_user(db, update.effective_user)
     print(update.effective_chat.id)
 
 
