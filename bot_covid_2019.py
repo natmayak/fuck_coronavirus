@@ -4,19 +4,14 @@ from random import choice
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
-from db import db, get_or_create_user #toogle_subscription
+from db import db, get_or_create_user, toggle_subscription, get_subscribers
 
 import settings
 import logging
 import requests
 
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO, filename='bot.log')
-
-# Создаем сет с подписчиками. Отсюда будем забирать чат айди
-#todo Сделать базу данных для сабов
-subscribers = set()
 
 # Создаем переменную, обозначающую, находится ли юзер дома или нет. По-умолчанию - да
 inhouse = True
@@ -29,6 +24,7 @@ latitude = float
 def greeting(update, context):
     user = update.effective_user
     first_name = user.first_name
+    user_data = get_or_create_user(db, update.effective_user, update.message)
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     greeting_text = f'Hello {first_name}{emo}. Best of luck with the corona crisis. I am going to help you stay alive. \n ' \
                     f'\n' \
@@ -36,21 +32,22 @@ def greeting(update, context):
                     f'\n' \
                     f'Also we can show you the closest pharmacy if something goes wrong with you. Try Pharmacies button and we will show you where you should go'
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting_text, reply_markup=get_keyboard(update))
-    get_or_create_user(db, update.effective_user)
     print(update.effective_chat.id)
 
 
 def get_keyboard(update):
     location_button = KeyboardButton('Pharmacies', request_location=True)
-    if update.message.chat_id in subscribers:
+    user = get_or_create_user(db, update.effective_user, update.message)
+    if user.get('subscribed'):
         sub_button = 'Unsubscribe'
     else:
         sub_button = 'Subscribe'
-    if inhouse == True:
+    if inhouse:
         leave_button = 'I am leaving my place'
     else:
         leave_button = 'I am back'
-    buttons = ReplyKeyboardMarkup([['I want to go out', leave_button], [sub_button], [location_button]], resize_keyboard=True)
+    buttons = ReplyKeyboardMarkup([['I want to go out', leave_button], [sub_button], [location_button]],
+                                  resize_keyboard=True)
     return buttons
 
 
@@ -62,10 +59,11 @@ def talk_to_me(update, context):
 
 
 def get_yandex():
-    #todo названия аптек
+    # todo названия аптек
     API_URL = 'https://search-maps.yandex.ru/v1/'
     # в spn задается амплитуда поиска
-    PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', spn="0.01000,0.01000", lang='ru_RU', apikey=settings.API_KEY_YNDX)
+    PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', spn="0.01000,0.01000", lang='ru_RU',
+                  apikey=settings.API_KEY_YNDX)
 
     response = requests.get(API_URL, params=PARAMS)
 
@@ -79,7 +77,8 @@ def get_yandex():
     while index_number <= 2:
         lst_of_places.append(places[index_number]['geometry']['coordinates'])
         lst_of_names.append(places[index_number]['properties']['name'])
-        lst_of_links.append(f'https://yandex.ru/maps/?text={lst_of_places[index_number][1]}%2C{lst_of_places[index_number][0]}')
+        lst_of_links.append(
+            f'https://yandex.ru/maps/?text={lst_of_places[index_number][1]}%2C{lst_of_places[index_number][0]}')
         index_number += 1
     print(lst_of_places)
     print(lst_of_names)
@@ -105,9 +104,12 @@ def get_location(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=location_text, reply_markup=get_keyboard(update))
     context.bot.send_message(chat_id=update.effective_chat.id, text=pharmacies_text, reply_markup=get_keyboard(update))
     while index_number <= 2:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=place_names[index_number], reply_markyp=get_keyboard(update))
-        context.bot.send_message(chat_id=update.effective_chat.id, text=links[index_number], reply_markyp=get_keyboard(update))
+        context.bot.send_message(chat_id=update.effective_chat.id, text=place_names[index_number],
+                                 reply_markyp=get_keyboard(update))
+        context.bot.send_message(chat_id=update.effective_chat.id, text=links[index_number],
+                                 reply_markyp=get_keyboard(update))
         index_number += 1
+
 
 def send_covid(update, context):
     covid_stickers = glob('media/*.tgs')
@@ -122,7 +124,8 @@ def bust_covid(update, context):
 
 
 def brodsky(update, context):
-    context.bot.send_voice(chat_id=update.message.chat.id, voice=open(choice(glob('root/fuck_coronavirus/media/brodskyi.mp3')), 'rb'))
+    context.bot.send_voice(chat_id=update.message.chat.id,
+                           voice=open(choice(glob('root/fuck_coronavirus/media/brodskyi.mp3')), 'rb'))
 
 
 def regular_messages(context):
@@ -138,16 +141,18 @@ def regular_messages(context):
     keyboard = [[InlineKeyboardButton(action[1], callback_data=action[3])]]
     reply_button = InlineKeyboardMarkup(keyboard)
     if inhouse == True:
-        for chat_id in subscribers:
-            context.bot.send_message(chat_id=chat_id, text=action[0], reply_markup=reply_button)
+        for user in get_subscribers(db):
+            context.bot.send_message(chat_id=user['chat_id'], text=action[0], reply_markup=reply_button)
     else:
         pass
-        # if action[0] == 'Fuck coronavirus!':
-        #     busted_covid = choice(glob('media/*.mp4'))
-        #     context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
-        # else:
-        #     sticker = choice(glob(str(action[2])))
-        #     context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
+
+
+#         # if action[0] == 'Fuck coronavirus!':
+#         #     busted_covid = choice(glob('media/*.mp4'))
+#         #     context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
+#         # else:
+#         #     sticker = choice(glob(str(action[2])))
+#         #     context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
 
 
 def button(update, context):
@@ -161,19 +166,21 @@ def subscribe(update, context):
     subscribe_text = "Thanks for subscribing! If you are not good enough for us you can always use /unsubscribe. " \
                      "But you'd rather not. Please"
     already_subscribe_text = "Oh please stop it! You are already such a good boy/girl."
-    if update.message.chat_id in subscribers:
+    user_data = get_or_create_user(db, update.effective_user, update.message)
+    if not user_data.get('subscribed'):
+        toggle_subscription(db, user_data)
+        context.bot.send_message(chat_id=update.message.chat_id, text=subscribe_text, reply_markup=get_keyboard(update))
+    else:
         context.bot.send_message(chat_id=update.message.chat_id, text=already_subscribe_text,
                                  reply_markup=get_keyboard(update))
-    else:
-        subscribers.add(update.message.chat_id)
-        context.bot.send_message(chat_id=update.message.chat_id, text=subscribe_text, reply_markup=get_keyboard(update))
 
 
 def unsubscribe(update, context):
     unsubscribe_text = "Well, you gonna die anyway. See you, little pussy..."
     nonsubscribe_text = "How can you unsubscribe if you haven't subscribed yet? Use your brain and press /subscribe"
-    if update.message.chat_id in subscribers:
-        subscribers.remove(update.message.chat_id)
+    user_data = get_or_create_user(db, update.effective_user, update.message)
+    if user_data.get('subscribed'):
+        toggle_subscription(db, user_data)
         context.bot.send_message(chat_id=update.message.chat_id, text=unsubscribe_text,
                                  reply_markup=get_keyboard(update))
     else:
@@ -193,6 +200,7 @@ def back_home(update, context):
     global inhouse
     inhouse = True
     context.bot.send_message(chat_id=update.message.chat_id, text=back_home_text, reply_markup=get_keyboard(update))
+
 
 def main():
     updater = Updater(settings.API_KEY, request_kwargs=settings.PROXY, use_context=True)
