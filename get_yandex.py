@@ -3,27 +3,35 @@ import settings
 
 API_URL = 'https://search-maps.yandex.ru/v1/'
 
-PARAMS = dict(text='аптеки', ll="37.575637, 55.742933", lang='ru_RU', apikey=settings.API_KEY_YNDX)
-# todo сейчас работает от конкретной точки, а надо:
-#  PARAMS = dict(text='аптеки', ll=<передать координаты из get_location>, lang='ru_RU', apikey=settings.API_KEY_YNDX)
-# todo начала писать для get_location:
-#  location = update.message.location
-#  lat = location['latitude']
-#  lon = location['longitude']
-#  ll = f'{lat}, {lon}'
+PARAMS = dict(text='аптека', ll="37.575637, 55.742933", spn="0.01000,0.01000", lang='ru_RU', apikey=settings.API_KEY_YNDX)
+
 
 response = requests.get(API_URL, params=PARAMS)
 print(response)
 
 results = response.json()
 print(results)
-pharmacies = results['features']
+#pharmacies = results['features']
+# index_number = 0
+# for pharmacy in pharmacies:
+#     address = pharmacies[index_number]['properties']['description']
+#     index_number += 1
+#     print(address)
+
+places = results['features']
+lst_of_places = list()
+lst_of_names = list()
+lst_of_links = list()
 index_number = 0
-for pharmacy in pharmacies:
-    # address = pharmacies[index_number]['properties']['CompanyMetaData']['address'] #это вариант выводит адрес с Россия, Москва и тд, что не очень
-    address = pharmacies[index_number]['properties']['description']
+while index_number <= 2:
+    lst_of_places.append(places[index_number]['geometry']['coordinates'])
+    lst_of_names.append(places[index_number]['properties']['name'])
+    #link = f'https://yandex.ru/maps/?text={lst_of_places[index_number][0]}%2C{lst_of_places[index_number][1]}'
+    lst_of_links.append(f'https://yandex.ru/maps/?text={lst_of_places[index_number][1]}%2C{lst_of_places[index_number][2]}')
     index_number += 1
-    print(address)
+print(lst_of_places)
+print(lst_of_names)
+print(lst_of_links)
 
 # todo надо забирать первые три аптеки и сформировать 3 ссылки
 
@@ -31,6 +39,8 @@ for pharmacy in pharmacies:
 #     address = pharmacy['properties']['description']
 
 # {'longitude': 37.575637, 'latitude': 55.742933}
+#               37.575933,             55.739966
+#               37.563105,             55.74053393
 # {'longitude': 37.528929, 'latitude': 55.775318}
 
 # {'type': 'FeatureCollection', 'properties': {'ResponseMetaData': {'SearchResponse': {'found': 91, 'display': 'multiple', 'boundedBy': [[37.55707582, 55.73117794], [37.59693218, 55.75361368]]}, 'SearchRequest': {'request': 'аптеки', 'skip': 0, 'results': 10, 'boundedBy': [[37.048427, 55.43644866], [38.175903, 56.04690174]]}}},
@@ -46,15 +56,3 @@ for pharmacy in pharmacies:
 # 'properties': {'name': 'Неофарм', 'description': 'площадь Киевского Вокзала, 1, Москва, Россия', 'boundedBy': [[37.563105, 55.74053393], [37.571315, 55.74516593]], 'CompanyMetaData': {'id': '52040331148', 'name': 'Неофарм', 'address': 'Россия, Москва, площадь Киевского Вокзала, 1', 'url': 'http://neopharm.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 585-55-15'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, круглосуточно', 'Availabilities': [{'TwentyFourHours': True, 'Everyday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.562981, 55.745607]},
 # 'properties': {'name': 'ГорЗдрав', 'description': 'Большая Дорогомиловская ул., 1, Москва, Россия', 'boundedBy': [[37.5588755, 55.74329093], [37.5670865, 55.74792293]], 'CompanyMetaData': {'id': '1020095219', 'name': 'ГорЗдрав', 'address': 'Россия, Москва, Большая Дорогомиловская улица, 1', 'url': 'http://gorzdrav.org/', 'Phones': [{'type': 'phone', 'formatted': '+7 (499) 653-62-77'}, {'type': 'phone', 'formatted': '+7 (495) 797-63-36'}, {'type': 'phone', 'formatted': '+7 (499) 653-62-67'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, 8:00–23:00', 'Availabilities': [{'Intervals': [{'from': '08:00:00', 'to': '23:00:00'}], 'Everyday': True}]}}}}]}
 
-
-# {'type': 'FeatureCollection', 'properties': {'ResponseMetaData': {'SearchResponse': {'found': 83, 'display': 'multiple', 'boundedBy': [[37.50827426, 55.76870042], [37.54816374, 55.79113319]]}, 'SearchRequest': {'request': 'аптеки', 'skip': 0, 'results': 10, 'boundedBy': [[37.048427, 55.43644866], [38.175903, 56.04690174]]}}},
-# 'features': [{'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.521961, 55.778342]},
-# 'properties': {'name': 'Здоров.ру', 'description': 'Хорошёвское ш., 82, Москва, Россия', 'boundedBy': [[37.517856, 55.77602793], [37.526066, 55.78065593]], 'CompanyMetaData': {'id': '223574945143', 'name': 'Здоров.ру', 'address': 'Россия, Москва, Хорошёвское шоссе, 82', 'url': 'https://zdorov.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 363-35-00'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, 7:00–23:00', 'Availabilities': [{'Intervals': [{'from': '07:00:00', 'to': '23:00:00'}], 'Everyday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.528127, 55.78321]},
-# 'properties': {'name': 'Дежурная', 'description': 'ул. Гризодубовой, 4, корп. 1, Москва, Россия', 'boundedBy': [[37.524022, 55.78089693], [37.532232, 55.78552293]], 'CompanyMetaData': {'id': '43359908752', 'name': 'Дежурная', 'address': 'Россия, Москва, улица Гризодубовой, 4к1', 'url': 'http://n1036.apteck.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 754-91-58'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, круглосуточно', 'Availabilities': [{'TwentyFourHours': True, 'Everyday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.520165, 55.774313]},
-# 'properties': {'name': 'Хорошая аптека', 'description': '4-я Магистральная ул., 5, стр. 1, Москва, Россия', 'boundedBy': [[37.5160595, 55.77199893], [37.5242705, 55.77662693]], 'CompanyMetaData': {'id': '221384857080', 'name': 'Хорошая аптека', 'address': 'Россия, Москва, 4-я Магистральная улица, 5, стр. 1', 'url': 'http://aptekamskgos.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 155-10-85'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, круглосуточно', 'Availabilities': [{'TwentyFourHours': True, 'Everyday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.543155, 55.773693]},
-# 'properties': {'name': 'Столички', 'description': 'Хорошёвское ш., 1, Москва, Россия', 'boundedBy': [[37.5390495, 55.77137843], [37.5472605, 55.77600743]], 'CompanyMetaData': {'id': '1744990326', 'name': 'Столички', 'address': 'Россия, Москва, Хорошёвское шоссе, 1', 'url': 'http://stolichki.ru/', 'Phones': [{'type': 'phone', 'formatted': '8 (800) 555-11-15'}, {'type': 'phone', 'formatted': '+7 (495) 215-52-15'}, {'type': 'phone', 'formatted': '+7 (499) 649-38-24'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'пн-пт 8:00–22:00; сб,вс 9:00–21:00', 'Availabilities': [{'Intervals': [{'from': '08:00:00', 'to': '22:00:00'}], 'Monday': True, 'Tuesday': True, 'Wednesday': True, 'Thursday': True, 'Friday': True}, {'Intervals': [{'from': '09:00:00', 'to': '21:00:00'}], 'Saturday': True, 'Sunday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.515864, 55.777689]},
-# 'properties': {'name': 'Аптеки Столички', 'description': 'Хорошёвское ш., 88, Москва, Россия', 'boundedBy': [[37.5117585, 55.77537493], [37.5199695, 55.78000293]], 'CompanyMetaData': {'id': '112084743848', 'name': 'Аптеки Столички', 'address': 'Россия, Москва, Хорошёвское шоссе, 88', 'url': 'http://stolichki.ru/', 'Phones': [{'type': 'phone', 'formatted': '8 (800) 555-11-15'}, {'type': 'phone', 'formatted': '+7 (495) 215-52-15'}, {'type': 'phone', 'formatted': '+7 (499) 648-30-05'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'пн-пт 8:00–22:00; сб,вс 9:00–21:00', 'Availabilities': [{'Intervals': [{'from': '08:00:00', 'to': '22:00:00'}], 'Monday': True, 'Tuesday': True, 'Wednesday': True, 'Thursday': True, 'Friday': True}, {'Intervals': [{'from': '09:00:00', 'to': '21:00:00'}], 'Saturday': True, 'Sunday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.534329, 55.779138]},
-# 'properties': {'name': 'Риона Трейд', 'description': 'ул. Полины Осипенко, 10, корп. 1, Москва, Россия', 'boundedBy': [[37.5302235, 55.77682443], [37.5384345, 55.78145143]], 'CompanyMetaData': {'id': '1377863206', 'name': 'Риона Трейд', 'address': 'Россия, Москва, улица Полины Осипенко, 10к1', 'url': 'http://n1028.apteck.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (499) 762-72-30'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}, {'class': 'malls', 'name': 'Салон оптики'}], 'Hours': {'text': 'пн-пт 9:00–21:00; сб,вс 9:00–20:00', 'Availabilities': [{'Intervals': [{'from': '09:00:00', 'to': '21:00:00'}], 'Monday': True, 'Tuesday': True, 'Wednesday': True, 'Thursday': True, 'Friday': True}, {'Intervals': [{'from': '09:00:00', 'to': '20:00:00'}], 'Saturday': True, 'Sunday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.513283, 55.784518]},
-# 'properties': {'name': 'Аптека столицы', 'description': 'ул. Куусинена, 15, корп. 2, Москва, Россия', 'boundedBy': [[37.5091775, 55.78220443], [37.5173885, 55.78683143]], 'CompanyMetaData': {'id': '1044961336', 'name': 'Аптека столицы', 'address': 'Россия, Москва, улица Куусинена, 15, корп. 2', 'url': 'http://www.cloikk.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 974-73-19'}, {'type': 'phone', 'formatted': '+7 (499) 943-26-62'}, {'type': 'phone', 'formatted': '+7 (495) 974-79-22'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'пн-пт 8:00–22:00; сб 9:00–20:00; вс 10:00–18:00', 'Availabilities': [{'Intervals': [{'from': '08:00:00', 'to': '22:00:00'}], 'Monday': True, 'Tuesday': True, 'Wednesday': True, 'Thursday': True, 'Friday': True}, {'Intervals': [{'from': '09:00:00', 'to': '20:00:00'}], 'Saturday': True}, {'Intervals': [{'from': '10:00:00', 'to': '18:00:00'}], 'Sunday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.515714, 55.78168]},
-# 'properties': {'name': 'Доктор Столетов', 'description': 'ул. Куусинена, 6, корп. 2, Москва, Россия', 'boundedBy': [[37.511609, 55.77936643], [37.519819, 55.78399343]], 'CompanyMetaData': {'id': '1038994997', 'name': 'Доктор Столетов', 'address': 'Россия, Москва, улица Куусинена, 6, корп. 2', 'url': 'http://www.stoletov.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 788-11-00'}, {'type': 'phone', 'formatted': '+7 (495) 988-33-38'}, {'type': 'phone', 'formatted': '+7 (495) 988-33-38'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, круглосуточно', 'Availabilities': [{'TwentyFourHours': True, 'Everyday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.524146, 55.778888]},
-# 'properties': {'name': 'Горфарма', 'description': 'Хорошёвское ш., 72, корп. 1, Москва, Россия', 'boundedBy': [[37.5200405, 55.77657443], [37.5282515, 55.78120143]], 'CompanyMetaData': {'id': '1200608162', 'name': 'Горфарма', 'address': 'Россия, Москва, Хорошёвское шоссе, 72, корп. 1', 'url': 'https://gorfarma.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (499) 517-90-07'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, круглосуточно', 'Availabilities': [{'TwentyFourHours': True, 'Everyday': True}]}}}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [37.520619, 55.786142]}, 'properties': {'name': 'Аптека 36,6', 'description': 'ул. Гризодубовой, 4, корп. 4, Москва, Россия', 'boundedBy': [[37.5165135, 55.78382843], [37.5247245, 55.78845543]], 'CompanyMetaData': {'id': '1299816240', 'name': 'Аптека 36,6', 'address': 'Россия, Москва, улица Гризодубовой, 4, корп. 4', 'url': 'http://www.366.ru/', 'Phones': [{'type': 'phone', 'formatted': '+7 (495) 797-63-66'}, {'type': 'phone', 'formatted': '+7 (495) 797-86-86'}, {'type': 'phone', 'formatted': '+7 (495) 797-63-36'}], 'Categories': [{'class': 'drugstores', 'name': 'Аптека'}], 'Hours': {'text': 'ежедневно, 9:00–22:00', 'Availabilities': [{'Intervals': [{'from': '09:00:00', 'to': '22:00:00'}], 'Everyday': True}]}}}}]}

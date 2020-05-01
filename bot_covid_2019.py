@@ -19,7 +19,7 @@ subscribers = set()
 # Создаем переменную, обозначающую, находится ли юзер дома или нет. По-умолчанию - да
 inhouse = True
 
-# Создаем перменные с локацией пользователя
+# Создаем переменные с локацией пользователя
 longitude = float
 latitude = float
 
@@ -28,7 +28,7 @@ def greeting(update, context):
     user = update.effective_user
     first_name = user.first_name
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
-    greeting_text = f'Hello {first_name}{emo}. Best of luck with the corona crisis. I am going to help you to stay alive. \n ' \
+    greeting_text = f'Hello {first_name}{emo}. Best of luck with the corona crisis. I am going to help you stay alive. \n ' \
                     f'\n' \
                     f'Try to keep your hands off anyway. Now try /subscribe and see what happens! \n' \
                     f'\n' \
@@ -61,33 +61,27 @@ def talk_to_me(update, context):
 def get_yandex():
     #todo названия аптек
     API_URL = 'https://search-maps.yandex.ru/v1/'
-
-    PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', lang='ru_RU', apikey=settings.API_KEY_YNDX)
+    # в spn задается амплитуда поиска
+    PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', spn="0.01000,0.01000", lang='ru_RU', apikey=settings.API_KEY_YNDX)
 
     response = requests.get(API_URL, params=PARAMS)
 
     results = response.json()
-    pharmacies = results['features']
-    lst_of_pharmacies = list()
-    lst_of_pharmacies.append(pharmacies[0]['geometry']['coordinates'])
-    lst_of_pharmacies.append(pharmacies[1]['geometry']['coordinates'])
-    lst_of_pharmacies.append(pharmacies[2]['geometry']['coordinates'])
-
-    coordinates_1 = lst_of_pharmacies[0]
-    coordinates_2 = lst_of_pharmacies[1]
-    coordinates_3 = lst_of_pharmacies[2]
-    longitude_1 = coordinates_1[0]
-    latitude_1 = coordinates_1[1]
-    longitude_2 = coordinates_2[0]
-    latitude_2 = coordinates_2[1]
-    longitude_3 = coordinates_3[0]
-    latitude_3 = coordinates_3[1]
-
-    link_1 = f'https://yandex.ru/maps/?text={latitude_1}%2C{longitude_1}'
-    link_2 = f'https://yandex.ru/maps/?text={latitude_2}%2C{longitude_2}'
-    link_3 = f'https://yandex.ru/maps/?text={latitude_3}%2C{longitude_3}'
-
-    return link_1, link_2, link_3
+    places = results['features']
+    lst_of_places = list()
+    lst_of_names = list()
+    lst_of_links = list()
+    index_number = 0
+    # создаем одним действием через while списки всего, что нужно забрать, при этом легко менять количество нужных элементов:
+    while index_number <= 2:
+        lst_of_places.append(places[index_number]['geometry']['coordinates'])
+        lst_of_names.append(places[index_number]['properties']['name'])
+        lst_of_links.append(f'https://yandex.ru/maps/?text={lst_of_places[index_number][1]}%2C{lst_of_places[index_number][0]}')
+        index_number += 1
+    print(lst_of_places)
+    print(lst_of_names)
+    print(lst_of_links)
+    return (lst_of_names, lst_of_links)
 
 
 def get_location(update, context):
@@ -99,18 +93,18 @@ def get_location(update, context):
     print(location)
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     location_text = f'Big brother is watching you (for your own safety) {emo}'
-    pharmacies_text = 'Here are the nearest pharmacies to you:'
-    links = get_yandex()
-    print(links)
-    link_1 = links[0]
-    link_2 = links[1]
-    link_3 = links[2]
+    pharmacies_text = 'Here are the pharmacies nearest to you:'
+    # stores_text = 'In case you are intolerant to home delivery, here’s a list of the nearest stores. Don’t forget to have your QR-code with you in case you meet the polite people.'
+    yandex_data = get_yandex()
+    place_names = yandex_data[0]
+    links = yandex_data[1]
+    index_number = 0
     context.bot.send_message(chat_id=update.effective_chat.id, text=location_text, reply_markup=get_keyboard(update))
     context.bot.send_message(chat_id=update.effective_chat.id, text=pharmacies_text, reply_markup=get_keyboard(update))
-    context.bot.send_message(chat_id=update.effective_chat.id, text=link_1, reply_markyp=get_keyboard(update))
-    context.bot.send_message(chat_id=update.effective_chat.id, text=link_2, reply_markyp=get_keyboard(update))
-    context.bot.send_message(chat_id=update.effective_chat.id, text=link_3, reply_markyp=get_keyboard(update))
-
+    while index_number <= 2:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=place_names[index_number], reply_markyp=get_keyboard(update))
+        context.bot.send_message(chat_id=update.effective_chat.id, text=links[index_number], reply_markyp=get_keyboard(update))
+        index_number += 1
 
 def send_covid(update, context):
     covid_stickers = glob('media/*.tgs')
@@ -185,7 +179,7 @@ def unsubscribe(update, context):
 
 
 def leave_home(update, context):
-    leave_home_text = "Well it is your own risk. Do not whine afterwards. However dead people can't whine..."
+    leave_home_text = "Welcome to take your own risks. Do not whine afterwards. However dead people can't whine..."
     global inhouse
     inhouse = False
     context.bot.send_message(chat_id=update.message.chat_id, text=leave_home_text, reply_markup=get_keyboard(update))
@@ -209,7 +203,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(I am back)$'), back_home))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(MessageHandler(Filters.location, get_location))
-    updater.job_queue.run_repeating(regular_messages, interval=10, first=10)
+    updater.job_queue.run_repeating(regular_messages, interval=10, first=5)
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
