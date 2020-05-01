@@ -125,7 +125,7 @@ def bust_covid(update, context):
 
 def brodsky(update, context):
     context.bot.send_voice(chat_id=update.message.chat.id,
-                           voice=open(choice(glob('root/fuck_coronavirus/media/brodskyi.mp3')), 'rb'))
+                           voice=open(choice(glob('root/fuck_coronavirus/media/brodsky.mp3')), 'rb'))
 
 
 def regular_messages(context):
