@@ -13,10 +13,10 @@ import requests
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO, filename='bot.log')
 
-# Создаем переменную, обозначающую, находится ли юзер дома или нет. По-умолчанию - да
+# Create a global variable of presence at home
 inhouse = True
 
-# Создаем переменные с локацией пользователя
+# Create 2 global variables with a location of user
 longitude = float
 latitude = float
 
@@ -51,6 +51,13 @@ def get_keyboard(update):
     return buttons
 
 
+def button(update, context):
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(text='{}'.format(query.data))
+
+
+# Answer to random messages
 def talk_to_me(update, context):
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     user_text = "Hi {} {}, you just caught some germs and said {}".format(update.message.chat.first_name, emo,
@@ -58,10 +65,10 @@ def talk_to_me(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=user_text, reply_markup=get_keyboard(update))
 
 
+# API yandex
 def get_yandex():
-    # todo названия аптек
     API_URL = 'https://search-maps.yandex.ru/v1/'
-    # в spn задается амплитуда поиска
+    # SPN gives an apltitude of a search
     PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', spn="0.01000,0.01000", lang='ru_RU',
                   apikey=settings.API_KEY_YNDX)
 
@@ -73,7 +80,6 @@ def get_yandex():
     lst_of_names = list()
     lst_of_links = list()
     index_number = 0
-    # создаем одним действием через while списки всего, что нужно забрать, при этом легко менять количество нужных элементов:
     while index_number <= 2:
         lst_of_places.append(places[index_number]['geometry']['coordinates'])
         lst_of_names.append(places[index_number]['properties']['name'])
@@ -83,9 +89,10 @@ def get_yandex():
     print(lst_of_places)
     print(lst_of_names)
     print(lst_of_links)
-    return (lst_of_names, lst_of_links)
+    return lst_of_names, lst_of_links
 
 
+# Get user's location and give him list of nearest pharmacies
 def get_location(update, context):
     location = update.message.location
     global latitude
@@ -96,7 +103,6 @@ def get_location(update, context):
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     location_text = f'Big brother is watching you (for your own safety) {emo}'
     pharmacies_text = 'Here are the pharmacies nearest to you:'
-    # stores_text = 'In case you are intolerant to home delivery, here’s a list of the nearest stores. Don’t forget to have your QR-code with you in case you meet the polite people.'
     yandex_data = get_yandex()
     place_names = yandex_data[0]
     links = yandex_data[1]
@@ -111,23 +117,13 @@ def get_location(update, context):
         index_number += 1
 
 
-def send_covid(update, context):
-    covid_stickers = glob('media/*.tgs')
-    sticker = choice(covid_stickers)
-    context.bot.send_sticker(chat_id=update.message.chat.id, sticker=open(sticker, 'rb'))
-
-
-def bust_covid(update, context):
-    covid_gifs = glob('media/*.mp4')
-    busted_covid = choice(covid_gifs)
-    context.bot.send_video(chat_id=update.message.chat.id, video=open(busted_covid, 'rb'))
-
-
+# Sending voice message
 def brodsky(update, context):
     context.bot.send_voice(chat_id=update.message.chat.id,
                            voice=open(choice(glob('root/fuck_coronavirus/media/brodsky.mp3')), 'rb'))
 
 
+# Job with regular messages with random choice
 def regular_messages(context):
     action_set = [
         ["Do not touch your face!", 'Well I do not touch it!', 'media/face.tgs', "But it's okay to touch yourself:)"],
@@ -145,21 +141,6 @@ def regular_messages(context):
             context.bot.send_message(chat_id=user['chat_id'], text=action[0], reply_markup=reply_button)
     else:
         pass
-
-
-#         # if action[0] == 'Fuck coronavirus!':
-#         #     busted_covid = choice(glob('media/*.mp4'))
-#         #     context.bot.send_video(chat_id=chat_id, video=open(busted_covid, 'rb'))
-#         # else:
-#         #     sticker = choice(glob(str(action[2])))
-#         #     context.bot.send_sticker(chat_id=chat_id, sticker=open(sticker, 'rb'))
-
-
-def button(update, context):
-    query = update.callback_query
-    query.answer()
-    # todo нужно еще удалять стикеры.
-    query.edit_message_text(text='{}'.format(query.data))
 
 
 def subscribe(update, context):
