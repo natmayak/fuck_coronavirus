@@ -195,7 +195,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(I am back)$'), back_home))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
     dp.add_handler(MessageHandler(Filters.location, get_location))
-    updater.job_queue.run_repeating(regular_messages, interval=5, first=5)
+    updater.job_queue.run_repeating(regular_messages, interval=1080, first=5)
     dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('subscribe', subscribe))
     dp.add_handler(CommandHandler('unsubscribe', unsubscribe))
