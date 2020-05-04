@@ -32,7 +32,6 @@ def greeting(update, context):
                     f'\n' \
                     f'Also we can show you the closest pharmacy if something goes wrong with you. Try Pharmacies button and we will show you where you should go'
     context.bot.send_message(chat_id=update.effective_chat.id, text=greeting_text, reply_markup=get_keyboard(update))
-    print(update.effective_chat.id)
 
 
 def get_keyboard(update):
@@ -68,7 +67,7 @@ def talk_to_me(update, context):
 # API yandex
 def get_yandex():
     API_URL = 'https://search-maps.yandex.ru/v1/'
-    # SPN gives an apltitude of a search
+    # SPN provides the span of the search
     PARAMS = dict(text='аптеки', ll=f'{longitude}, {latitude}', spn="0.01000,0.01000", lang='ru_RU',
                   apikey=settings.API_KEY_YNDX)
 
@@ -86,20 +85,16 @@ def get_yandex():
         lst_of_links.append(
             f'https://yandex.ru/maps/?text={lst_of_places[index_number][1]}%2C{lst_of_places[index_number][0]}')
         index_number += 1
-    print(lst_of_places)
-    print(lst_of_names)
-    print(lst_of_links)
     return lst_of_names, lst_of_links
 
 
-# Get user's location and give him list of nearest pharmacies
+# Get user's location to send the list of the nearest pharmacies
 def get_location(update, context):
     location = update.message.location
     global latitude
     latitude = location['latitude']
     global longitude
     longitude = location['longitude']
-    print(location)
     emo = emojize(choice(settings.USER_EMOJI), use_aliases=True)
     location_text = f'Big brother is watching you (for your own safety) {emo}'
     pharmacies_text = 'Here are the pharmacies nearest to you:'
@@ -123,16 +118,16 @@ def brodsky(update, context):
                            voice=open(choice(glob('root/fuck_coronavirus/media/brodsky.mp3')), 'rb'))
 
 
-# Job with regular messages with random choice
+# Sending with regular messages with random choice
 def regular_messages(context):
     action_set = [
-        ["Do not touch your face!", 'Well I do not touch it!', 'media/face.tgs', "But it's okay to touch yourself:)"],
+        ["Don't touch your face!", "Well I don't touch it!", 'media/face.tgs', "But it's okay to touch yourself:)"],
         ["Wash your hands!", 'Alright, alright. I have washed my hands!', 'media/hands.tgs',
          'Enjoy your sparkling fingers then'],
         ["Open your windows and go out of your room for 10-15 minutes", 'Well ok, I will do that.', 'media/fine.tgs',
          'Now breathe in deeply through the nose'],
         ["Fuck coronavirus!", 'Hell yeah! Fuck it!!!', 'media/fuck.tgs',
-         'Busted picture of covid that I do not have so far']]
+         "There should be a picture of exploded covid but I don't have it sadly"]]
     action = choice(action_set)
     keyboard = [[InlineKeyboardButton(action[1], callback_data=action[3])]]
     reply_button = InlineKeyboardMarkup(keyboard)
@@ -157,7 +152,7 @@ def subscribe(update, context):
 
 
 def unsubscribe(update, context):
-    unsubscribe_text = "Well, you gonna die anyway. See you, little pussy..."
+    unsubscribe_text = "Well, you're gonna die anyway. See you, little pussy..."
     nonsubscribe_text = "How can you unsubscribe if you haven't subscribed yet? Use your brain and press /subscribe"
     user_data = get_or_create_user(db, update.effective_user, update.message)
     if user_data.get('subscribed'):
@@ -177,7 +172,7 @@ def leave_home(update, context):
 
 
 def back_home(update, context):
-    back_home_text = 'Thanks god, you are still alive. But probably it will not last longer.'
+    back_home_text = 'Thanks God, you are still alive. But probably it will not last longer.'
     global inhouse
     inhouse = True
     context.bot.send_message(chat_id=update.message.chat_id, text=back_home_text, reply_markup=get_keyboard(update))
