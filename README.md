@@ -52,7 +52,8 @@ However you can rewrite this bot for other purposes if you require the following
 * send a number of supermarkets, shops and other organisations based on user location (you can change the type of organisations taken from Yandex) 
 * customise ReplyKeboardMarkup and InlineKeyboardMarkup buttons to your needs.
 
-## License ? [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
+## License 
+[![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 This project is [MIT Licensed](https://github.com/natmayak/fuck_coronavirus/blob/master/LICENSE)
 
 © 2020 [Yury Prokhorov](https://github.com/5071177) and [Nat Nikulina](https://github.com/natmayak)
