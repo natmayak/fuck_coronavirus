@@ -14,7 +14,7 @@ Try it out: https://t.me/fuck_corona_bot or simply search for @fuck_corona_bot i
 
 We are using [MongoDB](https://www.mongodb.com) and [Yandex Organizations](https://tech.yandex.ru/maps/geosearch/doc/concepts/request-docpage/).
 
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/natmayak/fuck_coronavirus/graphs/commit-activity)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/natmayak/fuck_coronavirus/graphs/commit-activity)
 
 ## Getting started
 
