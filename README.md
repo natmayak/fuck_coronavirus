@@ -55,4 +55,4 @@ However you can rewrite this bot for other purposes if you require the following
 ## License ? [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 This project is [MIT Licensed](https://github.com/natmayak/fuck_coronavirus/blob/master/LICENSE)
 
-© 2020 [Yuri Prokhorov](https://github.com/5071177) and [Nat Nikulina](https://github.com/natmayak)
+© 2020 [Yury Prokhorov](https://github.com/5071177) and [Nat Nikulina](https://github.com/natmayak)
