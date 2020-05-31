@@ -1,12 +1,12 @@
 # fuck_coronavirus
 Fuck_coronavirus is a telegram bot that helps you not to screw up your hygiene in these turbulent covid times. 
-The bot is essentially ironic and sometimes even strict to make sure you do what it tells you.
+The bot is essentially ironic and sometimes strict to make sure you do what it tells you.
  
 ### Reminders 
 You'll get basic reminders every 20 minutes to wash your hands and do other important things for your health.
 ### Pharmacies
 The bot also helps you find the nearest pharmacies around you. 
-Share your location with the bot and it will send you back the names of the 3 closest pharmacies with links to Yandex.Maps.
+Share your location with the bot and it will send you the names of the 3 closest pharmacies linked to Yandex.Maps.
 
 <img src= "https://user-images.githubusercontent.com/61066838/83327190-c0a97280-a282-11ea-9db4-d0ba6d9160f7.jpg" width = "260" height = "466" >
 
@@ -46,7 +46,7 @@ MONGO_DB = 'Users'
 
 The bot is made in connection with covid-2019 restrictions.
 
-However you can rewrite this bot for other purposes if you require the following basic functions:
+However you can use this bot as a template for other purposes if you require the following basic functions:
 
 * send any other regular reminders (you can change the description of actions and buttons)
 * send a number of supermarkets, shops and other organisations based on user location (you can change the type of organisations taken from Yandex) 
