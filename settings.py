@@ -1,5 +1,5 @@
-PROXY = {'proxy_url': 'socks5://t1.learn.python.ru:1080',
-         'urllib3_proxy_kwargs': {'username': 'learn', 'password': 'python'}}
+PROXY = {'proxy_url': '<Proxy URL>',
+         'urllib3_proxy_kwargs': {'username': '<Proxy username>', 'password': '<Proxy password>'}}
 
 API_KEY = '<TelegramBot API key>'
 
