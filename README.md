@@ -10,8 +10,6 @@ Share your location with the bot and it will send you the names of the 3 closest
 
 <img src= "https://user-images.githubusercontent.com/61066838/83327190-c0a97280-a282-11ea-9db4-d0ba6d9160f7.jpg" width = "260" height = "466" >
 
-Try it out: https://t.me/fuck_corona_bot.
-
 We are using [MongoDB](https://www.mongodb.com) and [Yandex Organizations](https://tech.yandex.ru/maps/geosearch/doc/concepts/request-docpage/).
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/natmayak/fuck_coronavirus/graphs/commit-activity)
